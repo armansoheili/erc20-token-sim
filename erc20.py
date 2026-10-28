@@ -176,6 +176,26 @@ class ERC20Token:
         self._allowances[(frm, spender)] = allowed - value
         return True
 
+    def holders(self) -> list[tuple[str, int]]:
+        """Return (account, balance) pairs with a nonzero balance, richest first.
+
+        >>> t = ERC20Token("Demo", "DEMO", 18, supply=1000, owner="alice")
+        >>> t.transfer("alice", "bob", 300)
+        True
+        >>> t.transfer("alice", "carol", 100)
+        True
+        >>> t.holders()
+        [('alice', 600), ('bob', 300), ('carol', 100)]
+        >>> t.burn("carol", 100)
+        True
+        >>> t.holders()
+        [('alice', 600), ('bob', 300)]
+        """
+        return sorted(
+            ((a, b) for a, b in self._balances.items() if b > 0),
+            key=lambda item: -item[1],
+        )
+
     # -------------------------------------------------------------- utils
     def atoms(self, tokens: float | int) -> int:
         """Convert whole/human tokens to atoms (value * 10**decimals)."""
